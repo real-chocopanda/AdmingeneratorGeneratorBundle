@@ -27,6 +27,8 @@ class Action
     protected $submit;
 
     protected $confirm_message;
+    
+    protected $csrf_protected = false;
 
     protected $crendentials;
     
@@ -114,6 +116,16 @@ class Action
     public function getConfirm()
     {
         return $this->confirm_message;
+    }
+    
+    public function setCsrfProtected($csrf_protected)
+    {
+        $this->csrf_protected = $csrf_protected;
+    }
+
+    public function getCsrfProtected()
+    {
+        return $this->csrf_protected;
     }
 
     public function setCredentials($crendentials)

@@ -38,6 +38,7 @@ class EchoExtension extends \Twig_Extension
             'echo_set'        => new \Twig_Function_Method($this, 'getEchoSet'),
             'echo_trans'      => new \Twig_Function_Method($this, 'getEchoTrans'),
             'echo_twig_assoc' => new \Twig_Function_Method($this, 'getEchoTwigAssoc'),
+            'echo_twig_filter'  => new \Twig_Function_Method($this, 'getEchoTwigFilter'),
         );
     }
 
@@ -294,13 +295,17 @@ class EchoExtension extends \Twig_Extension
         }
     }
 
-    public function getEchopath($path, $params = null)
+    public function getEchoPath($path, $params = null, $filters = null)
     {
         if (null === $params) {
-            return strtr('{{ path("%%path%%") }}',array('%%path%%' => $path));
+            return (null === $filters)
+              ? strtr('{{ path("%%path%%") }}', array('%%path%%' => $path))
+              : strtr('{{ path("%%path%%")|%%filters%% }}', array('%%path%%' => $path, '%%filters%%' => (is_array($filters) ? implode('|', $filters) : $filters) ));
         }
 
-        return strtr('{{ path("%%path%%", %%params%%) }}',array('%%path%%' => $path, '%%params%%'=>$params));
+        return (null === $filters)
+          ? strtr('{{ path("%%path%%", %%params%%) }}', array('%%path%%' => $path, '%%params%%' => $params))
+          : strtr('{{ path("%%path%%", %%params%%)|%%filters%% }}', array('%%path%%' => $path, '%%params%%' => $params, '%%filters%%' => (is_array($filters) ? implode('|', $filters) : $filters) ));
     }
 
     public function getEchoIfGranted($credentials, $modelName = null)
@@ -343,6 +348,15 @@ class EchoExtension extends \Twig_Extension
     public function getEchoTwig($str)
     {
         return sprintf('{{ %s }}', $str);
+    }
+
+    public function getEchoTwigFilter($str, $filters = null)
+    {
+        if (null === $filters) {
+            return $this->getEchoTwig($str);
+        }
+        
+        return strtr('{{ %%str%%|%%filters%% }}', array('%%str%%' => $str, '%%filters%%' => (is_array($filters) ? implode('|', $filters) : $filters) ));
     }
 
     public function getEchoBlock($name)
